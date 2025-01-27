@@ -112,7 +112,7 @@ void onMain(){
 }
 ```
 
-### More Examples [here](https://github.com/NodeppOficial/Nodepp/tree/main/examples)
+### More Examples [here](https://github.com/NodeppOfficial/Nodepp/tree/main/examples)
 
 ## Projects made with NodePP
 - 🔗: [Draw on your PC using your smartphone](https://github.com/ScreenDraw/PCDraw)
@@ -124,10 +124,10 @@ void onMain(){
 Check out some articles on [Medium](https://medium.com/@EDBCBlog)
 
 ## Compatibility
-- 🔗: [NodePP for Window | Linux | Mac | Bsd ](https://github.com/NodeppOficial/nodepp)
-- 🔗: [NodePP for Arduino](https://github.com/NodeppOficial/nodepp-arduino)
-- 🔗: [Nodepp for ESP32](https://github.com/NodeppOficial/nodepp-ESPXX)
-- 🔗: [Nodepp for WASM](https://github.com/NodeppOficial/nodepp-wasm)
+- 🔗: [NodePP for Window | Linux | Mac | Bsd ](https://github.com/NodeppOfficial/nodepp)
+- 🔗: [NodePP for Arduino](https://github.com/NodeppOfficial/nodepp-arduino)
+- 🔗: [Nodepp for ESP32](https://github.com/NodeppOfficial/nodepp-ESPXX)
+- 🔗: [Nodepp for WASM](https://github.com/NodeppOfficial/nodepp-wasm)
  
 ## FAQ
 - 🔗 : [/r/Nodepp/](https://www.reddit.com/r/Nodepp/comments/1eaq1pu/faq_ask_anything_about_nodepp/)
