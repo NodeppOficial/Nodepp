@@ -45,6 +45,7 @@ template< class T > T clamp( const T& val, const T& _min, const T& _max ){ retur
 #define coAgain         do { _state_ = _LINE_; return 0;     case _LINE_:; } while (0)
 #define coGoto(VALUE)   do { _state_ = VALUE ; return 1;                   } while (0)
 #define coYield(VALUE)  do { _state_ = VALUE ; return 1;     case VALUE:;  } while (0)
+#define coReset         coGoto(0)
 
 /*────────────────────────────────────────────────────────────────────────────*/
 
