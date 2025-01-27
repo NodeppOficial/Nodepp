@@ -498,7 +498,7 @@ public: socket_t() noexcept { _socket_::start_device(); }
             obj->feof = is_blocked(obj->feof) ?-2 : obj->feof;
             if( obj->feof <= 0 && obj->feof != -2 ){ close(); }
             return obj->feof;
-        } else { SOCKADDR* cli; if( obj->srv==1 ) cli = &obj->client_addr; else cli = &obj->server_addr;
+        } else { SOCKADDR* cli = obj->srv==1 ? &obj->client_addr : &obj->server_addr;
             obj->feof = ::recvfrom( obj->fd, bf, sx, 0, cli, &obj->len );
             obj->feof = is_blocked(obj->feof) ?-2 : obj->feof;
             if( obj->feof <= 0 && obj->feof != -2 ){ close(); }
