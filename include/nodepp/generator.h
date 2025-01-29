@@ -193,6 +193,8 @@ namespace nodepp { namespace _file_ {
         } elif( results[0]==0 ){
                  data = str->get_borrow().splice( 0, state-ch.size() );
         } else { data = str->get_borrow().splice( 0, state ); }
+
+        state = data.size();
     
     gnStop
     }
