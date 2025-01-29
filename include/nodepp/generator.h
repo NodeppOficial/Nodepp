@@ -162,6 +162,7 @@ namespace nodepp { namespace _file_ {
     private:
         _file_::read _read;
         string_t     s;
+        uint     pos=0;
 
     public: 
         string_t  data ;  
@@ -179,6 +180,36 @@ namespace nodepp { namespace _file_ {
         }      str->set_borrow(s);
 
         data = str->get_borrow().splice( 0, state );
+    
+    gnStop
+    }
+
+    template< class T > coEmit( T* str, string_t ch ){
+        if( str->is_closed() ){ return -1; }
+    gnStart s.clear(); data.clear(); str->flush();
+            state=0; pos=0;
+
+        while( str->is_available() ){
+        while( _read(str) == 1 ){ coNext;}
+           if( _read.state<= 0 ){ break; } state=0; s += _read.data; 
+          for( auto &x: s )     {
+           if( pos>=ch.size() ) { console::log(); pos=0; break; }
+         elif( ch[pos] == x )   { pos++; }
+         elif( ch[0]   == x )   { pos=1; }
+         else                   { pos=0; } state++; }
+           if( state<=s.size() ){ break; }
+        }      str->set_borrow(s); state -= pos;
+
+        ptr_t<int> results ({
+            memcmp( str->get_borrow().slice(state-ch.size()).get(), ch.get(), ch.size() ),
+            memcmp( str->get_borrow().get(), ch.get(), ch.size() )
+        });
+
+        if( results[1]==0 ){
+                 data = str->get_borrow().splice( 0, ch.size() );
+        } elif( results[0]==0 ){
+                 data = str->get_borrow().splice( 0, state-ch.size() );
+        } else { data = str->get_borrow().splice( 0, state ); }
     
     gnStop
     }};
