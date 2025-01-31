@@ -139,7 +139,7 @@ public:
 
     template< class T >
     hmac_t( const string_t& key, const T& type, ulong length ) 
-    :  obj( new NODE() ) { 
+    :  obj( new NODE() ) { if( key.empty() ){ return; }
         obj->bff   = ptr_t<uchar>( length ); 
         obj->ctx   = HMAC_CTX_new(); 
         obj->state = 1;
@@ -199,7 +199,7 @@ public:
     event_t<string_t> onData;
 
     xor_t( const string_t& key ) noexcept: obj( new NODE() ) {
-        obj->state = 1;
+        if( key.empty() ){ return; } obj->state = 1;
 
         CTX item1; memset( &item1, 0, sizeof(CTX) );
             item1.key = key; item1.pos = 0;
@@ -214,10 +214,10 @@ public:
     void update( string_t msg ) const noexcept { if( obj->state != 1 ){ return; }
         while( !msg.empty() ){ string_t tmp = msg.splice( 0, CHUNK_SIZE );
             forEach( y, obj->ctx ){ forEach( x, tmp ){ 
-                x = x ^ y.key[y.pos]; y.pos++; 
-                y.pos %= y.key.size();
-            }} if ( tmp.empty() ){ return; }
-            if ( onData.empty() ) { obj->buff +=tmp; } else { onData.emit( tmp ); }
+                x = x ^ y.key[ y.pos % y.key.size() ]; y.pos++; 
+            }} if ( tmp.empty() )     { return; }
+             elif ( onData.empty() )  { obj->buff +=tmp; }
+             else { onData.emit(tmp); }
         }
     }
 
@@ -255,7 +255,8 @@ public:
     event_t<>         onClose;
 
     template< class T >
-    cipher_t( const string_t& key, int mode, const T& type ) : obj( new NODE() ) { 
+    cipher_t( const string_t& key, int mode, const T& type ) 
+    :    obj( new NODE() ) { if( key.empty() ){ return; }
           uchar iv[EVP_MAX_IV_LENGTH] = {0};
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =       EVP_CIPHER_CTX_new(); obj->state = 1; 
@@ -264,7 +265,8 @@ public:
     }
 
     template< class T >
-    cipher_t( const string_t& iv, const string_t& key, int mode, const T& type ) : obj( new NODE() ) { 
+    cipher_t( const string_t& iv, const string_t& key, int mode, const T& type ) 
+    :    obj( new NODE() ) { if( key.empty() || iv.empty() ){ return; }
          
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =       EVP_CIPHER_CTX_new(); obj->state = 1; 
@@ -332,7 +334,8 @@ public:
     event_t<>         onClose;
 
     template< class T >
-    encrypt_t( const string_t& key, const T& type ) : obj( new NODE() ) { 
+    encrypt_t( const string_t& key, const T& type )
+    :    obj( new NODE() ) { if( key.empty() ){ return; }
           uchar iv[EVP_MAX_IV_LENGTH] = {0};
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =       EVP_CIPHER_CTX_new(); 
@@ -342,7 +345,8 @@ public:
     }
 
     template< class T >
-    encrypt_t( const string_t& iv, const string_t& key, const T& type ) : obj( new NODE() ) { 
+    encrypt_t( const string_t& iv, const string_t& key, const T& type )
+    :    obj( new NODE() ) { if( key.empty() || iv.empty() ){ return; }
          
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =    EVP_CIPHER_CTX_new(); 
@@ -402,7 +406,8 @@ public:
     event_t<>         onClose;
 
     template< class T >
-    decrypt_t( const string_t& key, const T& type ) : obj( new NODE() ) { 
+    decrypt_t( const string_t& key, const T& type )
+    :    obj( new NODE() ) { if( key.empty() ){ return; }
           uchar iv[EVP_MAX_IV_LENGTH] = {0};
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =    EVP_CIPHER_CTX_new(); 
@@ -412,7 +417,8 @@ public:
     }
 
     template< class T >
-    decrypt_t( const string_t& iv, const string_t& key, const T& type ) : obj( new NODE() ) { 
+    decrypt_t( const string_t& iv, const string_t& key, const T& type )
+    :    obj( new NODE() ) { if( key.empty() || iv.empty() ){ return; }
          
         obj->bff   = ptr_t<uchar>(CHUNK_SIZE,'\0');
         obj->ctx   =    EVP_CIPHER_CTX_new(); 
@@ -968,7 +974,8 @@ protected:
 public:
 
     template< class T >
-    ec_t( const string_t& key, const T& type ) noexcept : obj( new NODE() ) { 
+    ec_t( const string_t& key, const T& type ) noexcept
+    :obj( new NODE() ) { if( key.empty() ){ return; }
         obj->state = 1;
 
         obj->key_pair  = EC_KEY_new_by_curve_name(type);
