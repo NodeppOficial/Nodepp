@@ -33,14 +33,14 @@ public: any_t() noexcept {};
     
     /*─······································································─*/
 
+    virtual void free() const noexcept { any_ptr.free(); }
+    
+    /*─······································································─*/
+
     void operator=( const char* f ) noexcept { set( string::to_string(f) ); }
 
     template< class T >
     void operator=( const T& f ) noexcept { set( f ); }
-    
-    /*─······································································─*/
-
-    void free() const noexcept { any_ptr.free(); }
 
     template< class T >
     T as() const { return get<T>(); }

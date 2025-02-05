@@ -22,7 +22,7 @@
 namespace nodepp { class https_t : public ssocket_t {
 protected:
 
-    string_t  version;
+    string_t version;
 
 public:
 
@@ -40,7 +40,7 @@ public:
 
     template< class... T > 
     https_t( const T&... args ) noexcept : ssocket_t( args... ) {}
-    
+
     /*─······································································─*/
 
     void     set_version( const string_t& msg ) noexcept { version = msg; }
@@ -49,43 +49,34 @@ public:
 
     /*─······································································─*/
 
-    int read_header() noexcept {
-        if( !is_available() ){ return -1; }
-        static array_t<string_t> init; 
-        string_t base, line, a, b;
-        int idx;
-    coStart
-
-        base = read_line(); protocol = "HTTPS";
-        if( !regex::test( base,"HTTP/\\d\\.\\d" ) ) coEnd; 
-
-        init = regex::split( base, "\\s+" );       coNext;
-        if( init.size() < 4 )                       coEnd;
+    int read_header() noexcept { if( !is_available() ){ return -1; }
         
+        auto base = read_line(); protocol="HTTPS";
+        auto init = regex::split( base, "\\s+" );
+
+        if( !regex::test( base,"HTTP/\\d\\.\\d" ) ){ return -1; }
+        if( init.size() < 4 ){ return -1; }
+
         if( !regex::test( init[1], "^\\d+" ) ) {
             auto idx = init[1].index_of([]( char x ){ return x=='?'; });
               
             if( idx > 0 ){
-                path   = init[1].slice( 0,idx );
-                search = init[1].slice(   idx );
-                query  = query::parse (search);
-            } else {
-                path   = init[1];
-            }
+                     path= init[1].slice( 0,idx );
+                   search= init[1].slice(   idx );
+                    query= query::parse( search );
+            } else { path= init[1]; }
 
-                   method = init[0]; if( version.empty() ) version = init[2];
-            string_t host = headers["Host"].empty() ? "localhost" : headers["Host"];
-                      url = string::format( "https://%s%s%s", (char*)host, (char*)path, (char*)search );
-        } else {
-            version = init[0]; status = string::to_uint(init[1]);
-        }   coNext;
+                   method= init[0]; if( version.empty() ) version = init[2];
+            string_t host= headers["Host"].empty() ? "localhost" : headers["Host"];
+                      url= string::format( "http://%s%s%s", (char*)host, (char*)path, (char*)search );
+        } else { version = init[0]; status = string::to_uint( init[1] ); }
 
-        do {  line = read_line(); idx = line.index_of([]( char x ){ return x==':'; });
-            if( idx < 0 ){ break; } a = line.slice( 0,idx ).to_capital_case();
-                                    b = line.slice( idx+2, -2 ); headers[a]=b;
-        } while ( true ); coSet(0); return 0;
+        int idx = 0; do { auto line = read_line();
+            idx = line.index_of([]( char x ){ return x==':'; });
+            if( idx<0 ){ break; } auto a = line.slice( 0,idx ).to_capital_case();
+                                  auto b = line.slice( idx+2, -2 ); headers[a]=b;
+        } while ( true ); return 0;
 
-    coStop
     }
     
     /*─······································································─*/
@@ -98,10 +89,10 @@ public:
     
     /*─······································································─*/
 
-    void write_header( uint status, const header_t& headers ) const noexcept {
+    void write_header( uint status, const header_t& headers ) const noexcept { 
         string_t res; res += string::format("%s %u %s\r\n",(char*)version,status,(char*)HTTP_NODEPP::_get_http_status(status));
         for( auto x:headers.data() ){ res += string::format("%s: %s\r\n",(char*)x.first.to_capital_case(),(char*)x.second); }
-                                      res += "\r\n"; write( res ); if( method == "HEAD" ){ close(); }
+                                      res += "\r\n"; write( res ); if( method == "HEAD" ){ close(); } 
     }
     
     /*─······································································─*/
@@ -135,8 +126,8 @@ namespace nodepp { namespace https {
 
     template< class T > tls_t server( T cb, const ssl_t* ctx, agent_t* opt=nullptr ){
         return tls_t([=]( https_t cli ){ int c=0;
-            while(( c=cli.read_header() )==1 ){ process::next(); }
-            if( c==0 ){ cb( cli ); } else { cli.close(); }
+            if( cli.read_header()==0 ){ cb( cli ); } 
+          else{ cli.close(); }
         }, ctx, opt ); 
     }
     
@@ -158,10 +149,9 @@ namespace nodepp { namespace https {
         auto client = tls_t ([=]( https_t cli ){ 
             cli.set_timeout( gfc->timeout ); int c = 0; cli.write_header( gfc, dir );
 
-            while(( c=cli.read_header() )>0 ){ process::next(); }
-            if( c==0 ){ res( cli ); return; } else { 
+            if( cli.read_header()==0 ){ res( cli ); } else { 
                 rej(except_t("Could not connect to server"));
-                cli.close(); return; 
+                cli.close();
             }
             
         }, &ssl, &agn );

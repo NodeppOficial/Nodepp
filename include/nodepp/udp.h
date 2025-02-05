@@ -29,7 +29,6 @@ protected:
 
     struct NODE {
         int                       state =  0;
-        bool                      chck  =  1;
         agent_t                   agent;
         poll_t                    poll ;
         function_t<void,socket_t> func ;
@@ -56,10 +55,6 @@ public: udp_t() noexcept : obj(new NODE()) {}
     
     /*─······································································─*/
 
-    void poll( bool chck ) const noexcept { obj->chck = chck; }
-    
-    /*─······································································─*/
-
     void listen( const string_t& host, int port, decltype(NODE::func) cb ) const noexcept {
         if( obj->state == 1 ) { return; } if( dns::lookup(host).empty() )
           { _EERROR(onError,"dns couldn't get ip"); close(); return; }
@@ -72,7 +67,7 @@ public: udp_t() noexcept : obj(new NODE()) {}
                  sk.socket( dns::lookup(host), port );
                  sk.set_sockopt( self->obj->agent );
 
-        process::task::add([=](){
+        process::poll::add([=](){
             int c = 0; if( self->is_closed() ){ return -1; }
         coStart
 
@@ -108,7 +103,7 @@ public: udp_t() noexcept : obj(new NODE()) {}
                  sk.socket( dns::lookup(host), port );
                  sk.set_sockopt( self->obj->agent );
 
-        process::task::add([=](){
+        process::poll::add([=](){
         coStart
 
             cb(sk); sk.onClose.once([=](){ self->close(); });

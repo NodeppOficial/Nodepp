@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         EVP_DigestFinal_ex( obj->ctx, &obj->bff, &obj->length );
         EVP_MD_CTX_free( obj->ctx ); 
@@ -159,7 +159,7 @@ public:
         }
     }
 
-    void free() const noexcept {
+    virtual void free() const noexcept {
         if( obj->state == 0 ){ return; } obj->state = 0;
         HMAC_Final( obj->ctx, &obj->bff, &obj->length ); 
         HMAC_CTX_free( obj->ctx ); 
@@ -227,7 +227,7 @@ public:
 
     string_t get() const noexcept { free(); return obj->buff; }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if ( obj->state == 0 ){ return; } 
              obj->state = 0; onClose.emit();
     }
@@ -296,7 +296,7 @@ public:
         }
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         EVP_CipherFinal_ex( obj->ctx, &obj->bff, &obj->len );
         EVP_CIPHER_CTX_free( obj->ctx ); 
@@ -370,7 +370,7 @@ public:
 
     string_t get() const noexcept { free(); return obj->buff; }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         EVP_EncryptFinal( obj->ctx, &obj->bff, &obj->len );
         EVP_CIPHER_CTX_free( obj->ctx ); 
@@ -442,7 +442,7 @@ public:
 
     string_t get() const noexcept { free(); return obj->buff; }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         EVP_DecryptFinal( obj->ctx, &obj->bff, &obj->len ); 
         EVP_CIPHER_CTX_free( obj->ctx ); 
@@ -512,7 +512,7 @@ public:
         }
     }
 
-    void free() const noexcept { if ( obj->state == 0 ){ return; } 
+    virtual void free() const noexcept { if ( obj->state == 0 ){ return; } 
         string_t out; obj->state = 0; obj->ctx->len = 0;
 
         if ( obj->ctx->pos2 > -6 ){ 
@@ -579,7 +579,7 @@ public:
 
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; }
         if( obj->bn != nullptr ){ BN_clear_free( obj->bn ); }
             obj->state  = 0;
@@ -651,7 +651,7 @@ public:
         }
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if ( obj->state == 0 ){ return; } 
              obj->state =  0; onClose.emit();
     }
@@ -709,7 +709,7 @@ public:
 
     string_t get() const noexcept { free(); return obj->buff; }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 1 ){ return; } obj->state = 0;
         if( obj->bn != nullptr ){ BN_clear_free( obj->bn ); }
             onClose.emit();
@@ -809,7 +809,7 @@ public:
         fclose( fp );
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0; 
         if( obj->num != nullptr ){ BN_free( obj->num ); }
         if( obj->ctx != nullptr ){ X509_free( obj->ctx ); }
@@ -950,7 +950,7 @@ public:
 
     void close() const noexcept { free(); } 
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state =0;
         if( obj->num != nullptr ){ BN_free( obj->num ); }
         if( obj->rsa != nullptr ){ RSA_free( obj->rsa ); }
@@ -1018,7 +1018,7 @@ public:
 
     string_t get_private_key() const noexcept { return BN_bn2hex( obj->priv_key ); }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         if( obj->priv_key  != nullptr ){ BN_free( obj->priv_key ); }
     //  if( obj->key_pair  != nullptr ){ EC_KEY_free( obj->key_pair ); }
@@ -1086,7 +1086,7 @@ public:
         return BN_bn2hex( DH_get0_pub_key( obj->dh ) );
     }
 
-    void free() const noexcept {
+    virtual void free() const noexcept {
         if( obj->state == 0 ){ return; } obj->state = 0;
         if( obj->dh != nullptr ){ DH_free( obj->dh ); }
         if( obj->k  != nullptr ){ BN_free( obj->k ); }
@@ -1201,7 +1201,7 @@ public:
            { fclose( fp ); process::error("while writting the public key"); } fclose( fp );
     }
 
-    void free() const noexcept { 
+    virtual void free() const noexcept { 
         if( obj->state == 0 ){ return; } obj->state = 0;
         if( obj->dsa != nullptr ) DSA_free( obj->dsa );
     }

@@ -311,7 +311,7 @@ public:
     
     /*─······································································─*/
 
-    void free() const noexcept {
+    virtual void free() const noexcept {
         if( obj->ssl != nullptr ){
         if( obj->cnn == 1 ){
             SSL_shutdown( obj->ssl );

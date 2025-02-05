@@ -29,7 +29,6 @@ protected:
 
     struct NODE {
         int                       state = 0;
-        bool                      chck  = 1;
         agent_t                   agent;
         poll_t                    poll ;
         function_t<void,socket_t> func ;
@@ -37,11 +36,17 @@ protected:
     
     /*─······································································─*/
 
+    template< class T > void add_socket( T& cli ) const noexcept {
+        auto self = type::bind( this ); process::poll::add([=](){
+             self->obj->func(cli); return -1;
+        }); 
+    }
+
     int next() const noexcept {
           if( obj->poll.emit()==-1 ){ return -1; } auto x = obj->poll.get_last_poll();
-          if( x[0] == 0 ){ socket_t cli(x[1]); cli.set_sockopt( obj->agent ); onSocket.emit(cli); obj->func(cli); }
-        elif( x[0] == 1 ){ socket_t cli(x[1]); cli.set_sockopt( obj->agent ); onSocket.emit(cli); obj->func(cli); }
-        else             { socket_t cli(x[1]); cli.free(); } return 1;
+          if( x[0] >= 0 )
+            { socket_t cli(x[1]); cli.set_sockopt(obj->agent); add_socket(cli); }
+        else{ socket_t cli(x[1]); cli.free(); } return 1;
     }
     
 public: tcp_t() noexcept : obj( new NODE() ) {}
@@ -65,10 +70,6 @@ public: tcp_t() noexcept : obj( new NODE() ) {}
     
     /*─······································································─*/
 
-    void poll( bool chck ) const noexcept { obj->chck = chck; }
-    
-    /*─······································································─*/
-
     void listen( const string_t& host, int port, decltype(NODE::func) cb ) const noexcept {
         if( obj->state == 1 ){ return; } if( dns::lookup(host).empty() )
           { _EERROR(onError,"dns couldn't get ip"); close(); return; }
@@ -84,24 +85,19 @@ public: tcp_t() noexcept : obj( new NODE() ) {}
         if( sk.bind()   < 0 ){ _EERROR(onError,"Error while binding TCP");   close(); sk.free(); return; }
         if( sk.listen() < 0 ){ _EERROR(onError,"Error while listening TCP"); close(); sk.free(); return; }
         
-        cb( sk ); onOpen.emit( sk ); process::task::add([=](){
-            static int _accept = -2; self->next();
+        cb( sk ); onOpen.emit( sk ); process::poll::add([=](){
+            static int _accept = -2;
         coStart
 
             while( _accept == -2 ){
-               if( self->is_closed() || sk.is_closed() ){ coGoto(2); } 
-                   _accept = sk._accept(); if( _accept!=-2 ){ break; } 
-            coNext; }
+               if( self->is_closed() || sk.is_closed() ) { coGoto(2); } 
+                   _accept = sk._accept(); if( _accept!=-2 ) { break; } 
+            while( self->next()==1 ){ coSet(3); return 0; coYield(3); } coYield(1); }
             
-              if( _accept < 0 ){ _EERROR(self->onError,"Error while accepting TCP"); coGoto(2); }
-            elif( self->obj->chck ){
-              if( self->obj->poll.push_read(_accept)==0 )
-                { socket_t cli( _accept ); cli.free(); } 
-            } else {
-                  socket_t cli( _accept );
-                  cli.set_sockopt( self->obj->agent ); _poll_::poll task; 
-                  process::poll::add( task, cli, self, self->obj->func );
-            }     _accept = -2; coGoto(0); 
+            if( _accept < 0 ){ _EERROR(self->onError,"Error while accepting TCP"); coGoto(2); }
+            do{ if( self->obj->poll.push_read(_accept)==0 )
+              { socket_t cli( _accept ); cli.free(); } 
+              } while(0); _accept=-2; coSet(0); return 0; //coGoto(0); 
 
             coYield(2); self->close(); sk.free(); 
         
@@ -128,7 +124,7 @@ public: tcp_t() noexcept : obj( new NODE() ) {}
                  sk.socket( dns::lookup(host), port );
                  sk.set_sockopt( self->obj->agent );
 
-        process::task::add([=](){
+        process::poll::add([=](){
             if( self->is_closed() || sk.is_closed() ){ return -1; }
         coStart
 
@@ -137,12 +133,10 @@ public: tcp_t() noexcept : obj( new NODE() ) {}
                 _EERROR(self->onError,"Error while connecting TCP"); 
             coEnd; }
 
-            if( self->obj->chck ){
             if( self->obj->poll.push_write(sk.get_fd())==0 )
               { sk.free(); } while( self->obj->poll.emit()==0 ){ 
                    if( process::now() > sk.get_send_timeout() )
-                     { coEnd; } coNext; }
-            }   cb( sk ); 
+                     { coEnd; } coNext; } cb( sk ); 
             
             sk.onClose.once([=](){ self->close(); }); 
             self->onSocket.emit(sk); sk.onOpen.emit(); 

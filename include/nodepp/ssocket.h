@@ -33,19 +33,13 @@ public: ptr_t<ssl_t> ssl;
     
     /*─······································································─*/
 
-    virtual int _read( char* bf, const ulong& sx )  const noexcept { return __read( bf, sx ); }
-
-    virtual int _write( char* bf, const ulong& sx ) const noexcept { return __write( bf, sx ); }
-    
-    /*─······································································─*/
-
-    virtual int __read( char* bf, const ulong& sx ) const noexcept {
+    virtual int __read( char* bf, const ulong& sx ) const noexcept override {
         if ( process::millis() > get_recv_timeout() || is_closed() )
            { close(); return -1; } if ( sx==0 ) { return 0; }
         obj->feof = ssl->_read( bf, sx ); return obj->feof;
     }
 
-    virtual int __write( char* bf, const ulong& sx ) const noexcept {
+    virtual int __write( char* bf, const ulong& sx ) const noexcept override {
         if ( process::millis() > get_send_timeout() || is_closed() )
            { close(); return -1; } if ( sx==0 ) { return 0; } 
         obj->feof = ssl->_write( bf, sx ); return obj->feof;

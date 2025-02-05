@@ -53,6 +53,8 @@ namespace nodepp { namespace os {
 
     void exec( string_t cmd ){ ::system( cmd.get() ); }
 
+    void call( string_t cmd ){ ::system( cmd.get() ); }
+
     /*─······································································─*/
 
     uint pid(){ return GetCurrentProcessId(); }

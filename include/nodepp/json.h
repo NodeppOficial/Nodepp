@@ -248,7 +248,7 @@ namespace nodepp { namespace json {
     template<class T, class V>
     string_t stringify( const array_t<map_t<T,V>>& map ){
         auto obj = json::parse( map );
-        json::stringify( obj );
+        return json::stringify( obj );
     }
 
 }}

@@ -36,21 +36,21 @@ namespace task {
         if( queue.size() >= MAX_TASKS ){ return nullptr; }
         ptr_t<T>    clb = new T( cb );
         ptr_t<bool> blk = new bool(0);
-        ptr_t<bool> out = new bool(1);
-        queue.push([=](){ 
+        ptr_t<bool> out = new bool(1); queue.push([=](){ 
             if( *out==0 ){ return -1; }
             if( *blk==1 ){ return  1; } *blk = 1;
             int rs = (*clb) (arg...);   *blk = 0; 
             return *out==0 ? -1 : rs; 
         }); return (void*) &out;
-    } 
+    }
 
-    void next(){
-        if( queue.empty() ){ return; }
+    bool next(){
+        if( queue.empty() ){ return 0; }
           auto x = queue.get();
           int  y = x->data();
-          if ( y == 1 ){ queue.next(); }
-        elif ( y <  0 ){ queue.erase( x ); }
+        if( y ==-1 ){ queue.erase(x); }
+        if( y == 1 ){ queue.next();   }
+        return queue.get()!=queue.last();
     }
 
 }
@@ -77,21 +77,21 @@ namespace loop {
         if( queue.size() >= MAX_TASKS ){ return nullptr; }
         ptr_t<T>    clb = new T( cb );
         ptr_t<bool> blk = new bool(0);
-        ptr_t<bool> out = new bool(1);
-        queue.push([=](){ 
+        ptr_t<bool> out = new bool(1); queue.push([=](){ 
             if( *out==0 ){ return -1; }
             if( *blk==1 ){ return  1; } *blk = 1;
             int rs = (*clb) (arg...);   *blk = 0; 
             return *out==0 ? -1 : rs; 
         }); return (void*) &out;
-    } 
+    }
 
-    void next(){
-        if( queue.empty() ){ return; }
+    bool next(){
+        if( queue.empty() ){ return 0; }
           auto x = queue.get();
           int  y = x->data();
-          if ( y == 1 ){ queue.next(); }
-        elif ( y <  0 ){ queue.erase( x ); }
+        if( y ==-1 ){ queue.erase(x); }
+        if( y == 1 ){ queue.next();   }
+        return queue.get()!=queue.last();
     }
 
 }
@@ -118,21 +118,21 @@ namespace poll {
         if( queue.size() >= MAX_FILENO ){ return nullptr; }
         ptr_t<T>    clb = new T( cb );
         ptr_t<bool> blk = new bool(0);
-        ptr_t<bool> out = new bool(1);
-        queue.push([=](){ 
+        ptr_t<bool> out = new bool(1); queue.push([=](){ 
             if( *out==0 ){ return -1; }
             if( *blk==1 ){ return  1; } *blk = 1;
             int rs = (*clb) (arg...);   *blk = 0; 
             return *out==0 ? -1 : rs; 
         }); return (void*) &out;
-    } 
+    }
 
-    void next(){
-        if( queue.empty() ){ return; }
+    bool next(){
+        if( queue.empty() ){ return 0; }
           auto x = queue.get();
           int  y = x->data();
-          if ( y == 1 ){ queue.next(); }
-        elif ( y <  0 ){ queue.erase( x ); }
+        if( y ==-1 ){ queue.erase(x); }
+        if( y == 1 ){ queue.next();   }
+        return queue.get()!=queue.last();
     }
 
 }
@@ -186,11 +186,11 @@ namespace nodepp { namespace process {
 
     /*─······································································─*/
 
-    int next(){ 
+    int next(){
     coStart
-
-        if( !process::task::empty() ){ process::task::next(); coNext; }
+        
         if( !process::loop::empty() ){ process::loop::next(); coNext; }
+        if( !process::task::empty() ){ process::task::next(); coNext; }
         if( !process::poll::empty() ){ process::poll::next(); coNext; }
              process::yield();
 
@@ -200,10 +200,7 @@ namespace nodepp { namespace process {
     /*─······································································─*/
 
     template< class T, class... V > 
-    void await( T cb, const V&... args ){
-         while( cb( args... ) != -1 )
-              { next(); }
-    }
+    void await( T cb, const V&... args ){ while( cb( args... )!=-1 ){ next(); } }
 
 }}
 
