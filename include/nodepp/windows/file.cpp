@@ -76,13 +76,15 @@ public: file_t() noexcept {}
 
     file_t( const string_t& path, const string_t& mode, const ulong& _size=CHUNK_SIZE ){
         auto fg = get_fd_flag( mode ); obj->fd = CreateFileA( path.c_str(), fg[0], fg[1], NULL, fg[2], fg[3], NULL ); 
-        if( obj->fd == INVALID_HANDLE_VALUE ) process::error("such file or directory does not exist");
-            set_nonbloking_mode(); set_buffer_size( _size ); 
+        if( obj->fd == INVALID_HANDLE_VALUE ){ 
+            process::error("such file or directory does not exist");
+        }   set_nonbloking_mode(); set_buffer_size( _size ); 
     }
 
     file_t( const HANDLE& fd, const ulong& _size=CHUNK_SIZE ) {
-        if( fd == INVALID_HANDLE_VALUE ) process::error("such file or directory does not exist"); 
-            obj->fd = fd; set_nonbloking_mode(); set_buffer_size( _size ); 
+        if( fd == INVALID_HANDLE_VALUE ){ 
+            process::error("such file or directory does not exist"); 
+        }   obj->fd = fd; set_nonbloking_mode(); set_buffer_size( _size ); 
     }
 
     /*─······································································─*/
@@ -201,6 +203,24 @@ public: file_t() noexcept {}
         obj->feof = is_blocked( obj->feof, c ) ? -2 : c;
         if( obj->feof <= 0 && obj->feof != -2 ){ close(); }
         return obj->feof;
+    }
+
+    /*─······································································─*/
+
+    bool _write_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __write( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
+    }
+
+    bool _read_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __read( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
     }
     
 };}

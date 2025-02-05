@@ -364,8 +364,9 @@ public: socket_t() noexcept { _socket_::start_device(); }
     /*─······································································─*/
 
     socket_t( SOCKET fd, ulong _size=CHUNK_SIZE ){ _socket_::start_device();
-        if( fd == INVALID_SOCKET ) process::error("Such Socket has an Invalid fd");
-            obj->fd = fd; set_nonbloking_mode(); set_buffer_size(_size);
+        if( fd == INVALID_SOCKET ){ 
+            process::error("Such Socket has an Invalid fd");
+        }   obj->fd = fd; set_nonbloking_mode(); set_buffer_size(_size);
     }
 
     /*─······································································─*/
@@ -521,6 +522,24 @@ public: socket_t() noexcept { _socket_::start_device(); }
             return obj->feof;
         }   return -1;
     } 
+
+    /*─······································································─*/
+
+    bool _write_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __write( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
+    }
+
+    bool _read_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __read( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
+    }
     
 };}
 

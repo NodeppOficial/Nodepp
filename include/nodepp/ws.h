@@ -34,13 +34,13 @@ public:
     template< class... T > 
     ws_t( const T&... args ) noexcept : socket_t( args... ), ws( new NODE() ){}
 
-    virtual int _write( char* bf, const ulong& sx ) const noexcept {
+    virtual int _write( char* bf, const ulong& sx ) const noexcept override {
         if( is_closed() ){ return -1; } if( sx==0 ){ return 0; }
         while( ws->write( this, bf, sx )==1 ){ return -2; }
         return ws->write.data==0 ? -2 : ws->write.data;
     }
 
-    virtual int _read( char* bf, const ulong& sx ) const noexcept {
+    virtual int _read( char* bf, const ulong& sx ) const noexcept override {
         if( is_closed() ){ return -1; } if( sx==0 ){ return 0; }
         while( ws->read( this, bf, sx )==1 ){ return -2; }
         return ws->read.data==0 ? -2 : ws->read.data;

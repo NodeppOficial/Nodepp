@@ -39,7 +39,7 @@ protected:
 
     template< class T > void add_socket( T& cli ) const noexcept {
         auto self = type::bind( this ); process::poll::add([=](){
-             self->obj->func(cli); return -1;
+             self->onSocket.emit(cli); self->obj->func(cli); return -1;
         }); 
     }
 
