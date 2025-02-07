@@ -152,11 +152,11 @@ public: tls_t() noexcept : obj( new NODE() ) {}
             while( sk.ssl->_connect() == -2 ){ coNext; }
             if   ( sk.ssl->_connect() <=  0 ){ 
                 _EERROR(self->onError,"Error while handshaking TLS");
-            coEnd; }
+            coEnd; } cb( sk ); 
             
             sk.onClose.once([=](){ self->close(); }); 
             self->onSocket.emit(sk); sk.onOpen.emit();
-            self->onOpen.emit(sk); self->obj->func(sk); cb( sk ); 
+            self->onOpen.emit(sk); self->obj->func(sk);
 
         coStop
         });

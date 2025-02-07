@@ -136,11 +136,11 @@ public: tcp_t() noexcept : obj( new NODE() ) {}
             if( self->obj->poll.push_write(sk.get_fd())==0 )
               { sk.free(); } while( self->obj->poll.emit()==0 ){ 
                    if( process::now() > sk.get_send_timeout() )
-                     { coEnd; } coNext; }
+                     { coEnd; } coNext; } cb( sk );
             
             sk.onClose.once([=](){ self->close(); }); 
             self->onSocket.emit(sk); sk.onOpen.emit(); 
-            self->onOpen.emit(sk); self->obj->func(sk); cb( sk );
+            self->onOpen.emit(sk); self->obj->func(sk);
             
         coStop
         });
