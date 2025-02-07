@@ -308,6 +308,24 @@ public:
         if( obj->cnn == 0 ) while( _accept()==-2 ){ return -2; }
         return is_blocked( c=SSL_write( obj->ssl, bf, sx ) ) ? -2 : c;
     }
+
+    /*─······································································─*/
+
+    bool _write_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __write( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
+    }
+
+    bool _read_( char* bf, const ulong& sx, ulong& sy ) const noexcept {
+        if( sx==0 || is_closed() ){ return 1; } while( sy < sx ) {
+            int c = __read( bf+sy, sx-sy );
+            if( c <= 0 && c != -2 )          { return 0; }
+            if( c >  0 ){ sy += c; continue; } return 1;
+        }   return 0;
+    }
     
     /*─······································································─*/
 
