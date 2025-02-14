@@ -53,7 +53,7 @@ protected:
         elif( flag == "r+" ){ _flag |= O_RDWR   | O_APPEND ;          }
         elif( flag == "w+" ){ _flag |= O_RDWR   | O_APPEND | O_CREAT; }
         elif( flag == "a+" ){ _flag |= O_RDWR   | O_APPEND ;          }
-        else                { _flag |= O_RDWR   | O_NOCTTY ;          }
+        else                { _flag |= O_RDWR   | O_APPEND ;          }
         return  _flag;
     }
 

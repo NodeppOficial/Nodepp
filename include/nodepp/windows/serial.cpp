@@ -29,6 +29,7 @@ protected:
 			case 19200:   return CBR_19200;  break;
 			case 38400:   return CBR_38400;  break;
 			case 57600:   return CBR_57600;  break;
+			case 115200:  return CBR_115200; break;
 			default:      return CBR_9600;   break;
 		}
 	}

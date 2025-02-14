@@ -29,6 +29,7 @@ protected:
 			case 19200:   return B19200;  break;
 			case 38400:   return B38400;  break;
 			case 57600:   return B57600;  break;
+			case 115200:  return B115200; break;
 			default:      return B9600;   break;
 		}
 	}
